@@ -10,24 +10,37 @@ body:
   - type: textarea
     id: problem
     attributes:
-      label: Is your feature request related to a problem?
-      description: A clear and concise description of what the problem or limitation is.
+      label: Problem Description
+      description: A clear and concise description of what the problem or limitation is. What use case does this solve?
+      placeholder: I am always frustrated when... / Lumen currently lacks support for...
     validations:
       required: true
   - type: textarea
     id: solution
     attributes:
-      label: Describe the solution you'd like
-      description: A clear and concise description of what you want to happen.
+      label: Proposed Solution
+      description: A clear and concise description of what you want to happen and how it should work. Include proposed interfaces, APIs, or usage examples if applicable.
     validations:
       required: true
   - type: textarea
     id: alternatives
     attributes:
-      label: Describe alternatives you've considered
-      description: Any alternative solutions or workarounds you considered.
+      label: Alternatives Considered
+      description: Any alternative solutions, patterns, or workarounds you have considered and why they were not chosen.
+  - type: checkboxes
+    id: packages
+    attributes:
+      label: Affected Packages
+      description: Which packages within the Lumen monorepo does this feature affect?
+      options:
+        - label: `@lumen/core`
+        - label: `@lumen/server`
+        - label: `@lumen/web-sdk`
+        - label: `@lumen/react`
+        - label: `@lumen/cli`
+        - label: Other / Infrastructure
   - type: textarea
     id: additional-context
     attributes:
       label: Additional Context
-      description: Add any other context, API design snippets, or screenshots here.
+      description: Add any other context, code snippets, or screenshots here.
