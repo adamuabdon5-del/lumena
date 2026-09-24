@@ -67,11 +67,19 @@ Add the upstream remote:
 git remote add upstream https://github.com/utilityjnr1/lumena.git
 ```
 
-### 2. Install Dependencies
+### 2. Bootstrap Development Environment & Install Dependencies
 
-Install all dependencies across the monorepo using `pnpm`:
+Bootstrap your development environment by creating your `.env` configuration file from `.env.example` and installing all dependencies:
 
 ```bash
+pnpm setup
+# or: pnpm run setup
+```
+
+Alternatively, you can manually copy `.env.example` to `.env` and run `pnpm install`:
+
+```bash
+cp .env.example .env
 pnpm install
 ```
 
@@ -145,6 +153,8 @@ Lumen is organized as a monorepo under `packages/`:
 | `pnpm dev` | Starts development mode with watch/rebuild across packages |
 | `pnpm test` | Runs the test suites across all packages |
 | `pnpm check` | **Recommended**: Runs linting, typechecking, and tests in parallel |
+| `pnpm clean` | Cleans all `dist/` build artifacts across packages via Turborepo |
+| `pnpm setup` | Bootstraps `.env` from `.env.example` and installs dependencies |
 | `pnpm lint` | Runs ESLint across the codebase |
 | `pnpm lint:fix` | Runs ESLint and automatically applies fixes |
 | `pnpm format` | Formats all files with Prettier |
@@ -236,6 +246,21 @@ pnpm format
 - Always favor strict typing. Provide full interfaces and types for Soroban event payloads, transaction envelopes, and API models.
 - Avoid casting with `as any`. If type narrowing is needed, write explicit type guards.
 - Use explicit return types for public functions and API handlers.
+
+### 4. VS Code Workspace Setup
+
+If you use Visual Studio Code, workspace configurations are included in `.vscode/`:
+
+- **Recommended Extensions** (`.vscode/extensions.json`):
+  - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) (`dbaeumer.vscode-eslint`)
+  - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) (`esbenp.prettier-vscode`)
+  - [Playwright Test for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright) (`ms-playwright.playwright`)
+- **Workspace Settings** (`.vscode/settings.json`):
+  - Sets Prettier as the default formatter.
+  - Automatically formats files on save (`editor.formatOnSave: true`).
+  - Automatically fixes ESLint warnings and errors on save (`editor.codeActionsOnSave: { "source.fixAll.eslint": "explicit" }`).
+
+When you open the repository in VS Code, accept the prompt to install recommended extensions for an integrated development workflow.
 
 ---
 

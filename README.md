@@ -77,13 +77,18 @@ Most wallet SDKs require users to manage seed phrases and hold tokens for gas. L
 
 ## Quickstart
 
-> **Prereqs:** Node.js 18+, pnpm, Docker (for the local Stellar network).
+> **Prereqs:** Node.js 20+, pnpm, Docker (for the local Stellar network).
 
-### 1. Install dependencies
+### 1. Bootstrap the environment
+
+Run the setup script to initialize your `.env` configuration file from `.env.example` and install all monorepo dependencies:
 
 ```bash
-pnpm install
+pnpm setup
+# or: pnpm run setup
 ```
+
+Follow the terminal prompts to edit `.env` with your network and key configuration (e.g. `FEE_PAYER_SECRET`, `COSIGNER_SECRET`).
 
 ### 2. Start the local Stellar network
 
@@ -91,21 +96,14 @@ pnpm install
 docker compose -f docker/docker-compose.yml up -d
 ```
 
-### 3. Configure your environment
-
-```bash
-cp .env.example .env
-# Edit .env with your keys and network settings
-```
-
-### 4. Build and test
+### 3. Build and test
 
 ```bash
 pnpm build
 pnpm test
 ```
 
-### 5. Start the server
+### 4. Start the server
 
 ```bash
 pnpm --filter @lumen/server dev

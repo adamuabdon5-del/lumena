@@ -52,3 +52,72 @@ Decodes transaction XDR, displays operation details, and simulates policy checks
 ```bash
 npx @lumen/cli cosign inspect "AAAAAgAAA..."
 ```
+
+---
+
+## Development
+
+You can run and develop `@lumen/cli` in isolation without running the entire monorepo.
+
+### Prerequisites
+
+1. **Install Dependencies**: Install dependencies from the repository root:
+   ```bash
+   pnpm install
+   ```
+
+2. **Build Dependent Packages**: Build the monorepo dependencies (`@lumen/core` and `@lumen/types`):
+   ```bash
+   pnpm build
+   ```
+
+3. **(Optional) Start Server & Network**: To run commands communicating with the backend (`status`, `wallet create`, `policy`):
+   ```bash
+   # Start local Stellar standalone container
+   docker compose -f docker/docker-compose.yml up -d stellar
+
+   # Start the Lumen server
+   pnpm --filter @lumen/server dev
+   ```
+
+### Running in Development Mode
+
+Run TypeScript in watch mode to automatically compile `src/` to `dist/` on changes:
+
+```bash
+pnpm --filter @lumen/cli dev
+```
+
+### Running the Local CLI Binary
+
+Test commands with your local build:
+
+```bash
+node packages/cli/bin/lumen.js --help
+node packages/cli/bin/lumen.js status --server http://localhost:3000
+```
+
+### Additional Package Scripts
+
+From the repository root:
+
+```bash
+# Typecheck TypeScript files
+pnpm --filter @lumen/cli typecheck
+
+# Lint source files
+pnpm --filter @lumen/cli lint
+
+# Build CLI package
+pnpm --filter @lumen/cli build
+
+# Clean build artifacts
+pnpm --filter @lumen/cli clean
+```
+
+---
+
+## License
+
+MIT
+

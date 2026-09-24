@@ -89,6 +89,58 @@ See `.env.example` at the repo root for the full list.
 2. `sendPayment` — the SDK builds a payment transaction and signs it with the user's device key. The server co-signer verifies it against the policy engine before adding its own signature.
 3. Gasless — all transactions are wrapped in a fee-bump so the user's wallet never needs to hold XLM for fees.
 
+## Development
+
+You can develop `@lumen/web-sdk` in isolation without running the entire monorepo.
+
+### Prerequisites
+
+1. **Install Dependencies**: Ensure monorepo dependencies are installed from repository root:
+   ```bash
+   pnpm install
+   ```
+
+2. **Build Dependencies**: Build internal workspace dependencies (`@lumen/core`, `@lumen/types`):
+   ```bash
+   pnpm build
+   ```
+
+3. **(Optional) Local Network & Server**: If running integration or E2E tests against a local Stellar node:
+   ```bash
+   # Start local Stellar standalone container
+   docker compose -f docker/docker-compose.yml up -d stellar
+
+   # Start the Lumen server
+   pnpm --filter @lumen/server dev
+   ```
+
+### Running in Development Mode
+
+Run TypeScript in watch mode to automatically compile changes from `src/` to `dist/`:
+
+```bash
+pnpm --filter @lumen/web-sdk dev
+```
+
+### Additional Package Scripts
+
+```bash
+# Run unit tests
+pnpm --filter @lumen/web-sdk test
+
+# Typecheck source files
+pnpm --filter @lumen/web-sdk typecheck
+
+# Lint source files
+pnpm --filter @lumen/web-sdk lint
+
+# Build production bundle
+pnpm --filter @lumen/web-sdk build
+
+# Clean build artifacts
+pnpm --filter @lumen/web-sdk clean
+```
+
 ## License
 
 MIT
