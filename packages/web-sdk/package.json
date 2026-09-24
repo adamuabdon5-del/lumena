@@ -12,6 +12,8 @@
   },
   "scripts": {
     "build": "tsc",
+    "clean": "rm -rf dist",
+    "dev": "tsc --watch",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"

@@ -134,13 +134,47 @@ await sendPayment({
 
 ## Development
 
+You can work on `@lumen/react` independently without running the full monorepo suite.
+
+### Prerequisites
+
+1. **Install Dependencies**: Install workspace dependencies at the monorepo root:
+   ```bash
+   pnpm install
+   ```
+
+2. **Build Dependent Packages**: Build the core dependencies (`@lumen/core` and `@lumen/web-sdk`):
+   ```bash
+   pnpm build
+   ```
+
+### Running in Development Mode
+
+Run TypeScript in watch mode to automatically compile on file changes:
+
+```bash
+pnpm --filter @lumen/react dev
+```
+
+### Additional Package Scripts
+
 From the repository root:
 
 ```bash
-pnpm --filter @lumen/react lint
-pnpm --filter @lumen/react typecheck
+# Run unit tests with Vitest and React Testing Library
 pnpm --filter @lumen/react test
+
+# Check TypeScript types
+pnpm --filter @lumen/react typecheck
+
+# Lint source files
+pnpm --filter @lumen/react lint
+
+# Build production bundle
 pnpm --filter @lumen/react build
+
+# Clean build artifacts
+pnpm --filter @lumen/react clean
 ```
 
 ## License

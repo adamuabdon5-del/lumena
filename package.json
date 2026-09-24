@@ -8,6 +8,8 @@
     "dev": "turbo dev",
     "test": "turbo test",
     "check": "turbo lint typecheck test",
+    "clean": "turbo clean",
+    "setup": "node scripts/setup.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
