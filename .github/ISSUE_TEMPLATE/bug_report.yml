@@ -6,42 +6,56 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting an issue! Please provide as much detail as possible to help us investigate.
+        Thank you for reporting an issue! Please provide as much detail as possible to help us investigate and resolve it.
   - type: textarea
     id: description
     attributes:
       label: Problem Description
       description: A clear and concise description of what the bug is.
+      placeholder: Describe what happened...
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
       label: Steps to Reproduce
-      description: Steps to reproduce the behavior.
+      description: Detailed steps to reproduce the behavior.
       placeholder: |
-        1. Start server with '...'
-        2. Send request to '...'
-        3. See error
+        1. Start server or initialize SDK with '...'
+        2. Execute action / invoke '...'
+        3. Observe error
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
       label: Expected Behavior
-      description: What you expected to happen instead.
+      description: A clear and concise description of what you expected to happen.
     validations:
       required: true
   - type: textarea
-    id: logs
+    id: actual
     attributes:
-      label: Logs / Output
-      description: Any relevant error logs or stack traces.
-      render: shell
-  - type: input
-    id: version
-    attributes:
-      label: Lumen Version / Commit
-      description: What version or git commit hash of Lumen are you using?
+      label: Actual Behavior
+      description: A clear and concise description of what actually happened.
     validations:
-      required: false
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: Relevant details about your runtime environment.
+      placeholder: |
+        - OS: [e.g. macOS, Ubuntu, Windows]
+        - Node Version: [e.g. 20.x]
+        - Package: [e.g. @lumen/core, @lumen/server, @lumen/web-sdk, @lumen/react, @lumen/cli]
+        - Stellar Network: [e.g. testnet, mainnet, local quickstart]
+        - Lumen Version / Git Commit: [e.g. v1.0.0 or commit hash]
+    validations:
+      required: true
+  - type: textarea
+    id: logs-xdr
+    attributes:
+      label: XDR or Logs
+      description: Any relevant error logs, stack traces, console output, or Stellar transaction / result XDR strings if applicable.
+      render: shell
