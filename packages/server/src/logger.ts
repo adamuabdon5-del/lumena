@@ -3,7 +3,18 @@ import { pinoHttp } from "pino-http";
 import type { IncomingMessage } from "node:http";
 import { randomUUID } from "node:crypto";
 
-const logLevel = process.env.LOG_LEVEL ?? "info";
+const VALID_LOG_LEVELS = ["trace", "debug", "info", "warn", "error", "fatal"] as const;
+type LogLevel = (typeof VALID_LOG_LEVELS)[number];
+
+function resolveLogLevel(): LogLevel {
+  const raw = process.env.LUMEN_LOG_LEVEL;
+  if (raw && (VALID_LOG_LEVELS as readonly string[]).includes(raw)) {
+    return raw as LogLevel;
+  }
+  return "info";
+}
+
+const logLevel = resolveLogLevel();
 
 export const logger = pino({
   level: logLevel,
