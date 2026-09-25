@@ -6,7 +6,7 @@ import {
   PasskeyManager,
   type PasskeyRegistrationOpts,
 } from "@lumen/core";
-import type { StellarNetwork, ContractSimulationResult } from "@lumen/types";
+import type { StellarNetwork, ContractSimulationResult, ScValInput } from "@lumen/types";
 
 export interface LumenClientOpts {
   network?: StellarNetwork;
@@ -138,7 +138,7 @@ export class LumenClient {
     const knownAsset = KNOWN_ASSETS[network]?.[assetCode];
     if (!knownAsset) {
       throw new Error(
-        `Unknown asset: ${assetCode}. Known assets: ${Object.keys(KNOWN_ASSETS[network] ?? {}).join(", ")}`
+        `Unknown asset: ${assetCode}. Known assets: ${Object.keys(KNOWN_ASSETS[network] ?? {}).join(", ")}`,
       );
     }
 
@@ -149,7 +149,7 @@ export class LumenClient {
     id: string,
     destination: string,
     assetCode: string,
-    amount: string
+    amount: string,
   ): Promise<{ hash: string }> {
     const wallet = this.wallets.get(id);
     if (!wallet) throw new Error(`Wallet not found: ${id}`);
@@ -162,7 +162,7 @@ export class LumenClient {
       const knownAsset = KNOWN_ASSETS[network]?.[assetCode];
       if (!knownAsset) {
         throw new Error(
-          `Unknown asset: ${assetCode}. Known assets: ${Object.keys(KNOWN_ASSETS[network] ?? {}).join(", ")}`
+          `Unknown asset: ${assetCode}. Known assets: ${Object.keys(KNOWN_ASSETS[network] ?? {}).join(", ")}`,
         );
       }
       asset = knownAsset;
@@ -197,7 +197,9 @@ export class LumenClient {
 
       if (!submitRes.ok) {
         const errorData = await submitRes.json().catch(() => ({}));
-        throw new Error(errorData.error ?? `Fee-bump submit failed with status ${submitRes.status}`);
+        throw new Error(
+          errorData.error ?? `Fee-bump submit failed with status ${submitRes.status}`,
+        );
       }
 
       const result = await submitRes.json();
@@ -211,7 +213,7 @@ export class LumenClient {
     id: string,
     contractId: string,
     method: string,
-    args?: any[]
+    args?: ScValInput[],
   ): Promise<ContractSimulationResult> {
     const wallet = this.wallets.get(id);
     if (!wallet) throw new Error(`Wallet not found: ${id}`);
@@ -222,8 +224,8 @@ export class LumenClient {
     id: string,
     contractId: string,
     method: string,
-    args?: any[],
-    fee?: string
+    args?: ScValInput[],
+    fee?: string,
   ): Promise<{ hash: string }> {
     const wallet = this.wallets.get(id);
     if (!wallet) throw new Error(`Wallet not found: ${id}`);
@@ -233,14 +235,14 @@ export class LumenClient {
 
 export async function createWalletWithPasskey(
   client: LumenClient,
-  opts?: PasskeyRegistrationOpts
+  opts?: PasskeyRegistrationOpts,
 ): Promise<PasskeyWalletResult> {
   return client.createWalletWithPasskey(opts);
 }
 
 export async function signWithPasskey(
   client: LumenClient,
-  opts: { credentialId?: string; transactionXdr: string; username?: string }
+  opts: { credentialId?: string; transactionXdr: string; username?: string },
 ): Promise<{ signedXdr: string; publicKey: string }> {
   return client.signWithPasskey(opts);
 }
