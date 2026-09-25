@@ -1,8 +1,13 @@
+import { StrKey } from "@stellar/stellar-sdk";
 import { z } from "zod";
 
 export const CosignRequestSchema = z.object({
   xdr: z.string().min(1, "xdr is required"),
-  walletAddress: z.string().startsWith("G", "walletAddress must be a valid Stellar public key"),
+  walletAddress: z
+    .string()
+    .refine((val) => StrKey.isValidEd25519PublicKey(val), {
+      message: "walletAddress must be a valid Stellar public key",
+    }),
 });
 
 export const FeeBumpRequestSchema = z.object({

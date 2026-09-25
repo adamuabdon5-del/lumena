@@ -21,6 +21,34 @@ describe("validation schemas", () => {
     expect(result.success).toBe(false);
   });
 
+  it("rejects cosign requests with invalid Stellar public key", () => {
+    const invalidAddress = {
+      xdr: "AAAA...",
+      walletAddress: "not-a-valid-stellar-address",
+    };
+    const result = CosignRequestSchema.safeParse(invalidAddress);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.walletAddress).toContain(
+        "walletAddress must be a valid Stellar public key"
+      );
+    }
+  });
+
+  it("rejects cosign requests with malformed public key starting with G", () => {
+    const invalidAddress = {
+      xdr: "AAAA...",
+      walletAddress: "GBADCHECKSUMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    };
+    const result = CosignRequestSchema.safeParse(invalidAddress);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.walletAddress).toContain(
+        "walletAddress must be a valid Stellar public key"
+      );
+    }
+  });
+
   it("validates valid fee bump requests", () => {
     const valid = { xdr: "AAAA..." };
     const result = FeeBumpRequestSchema.safeParse(valid);
