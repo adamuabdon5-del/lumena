@@ -1,4 +1,4 @@
-import type { Transaction, Operation } from "@stellar/stellar-sdk";
+import type { Transaction, Operation, Asset } from "@stellar/stellar-sdk";
 import type {
   Policy,
   PolicyRule,
@@ -8,6 +8,7 @@ import type {
   SessionKeyPolicyRule,
   TimeBoundsRule,
 } from "@lumen/types";
+import { validateTimeBounds } from "@lumen/core";
 
 export interface EvaluateOpts {
   walletAddress: string;
@@ -23,8 +24,10 @@ export class PolicyEngine {
   private policies: Map<string, Policy> = new Map();
 
   // In-memory tracking for spend limit and velocity
-  private readonly spendTracking: Map<string, Map<string, { dailyTotal: number; txCount: number }>> =
-    new Map();
+  private readonly spendTracking: Map<
+    string,
+    Map<string, { dailyTotal: number; txCount: number }>
+  > = new Map();
   private readonly velocityTracking: Map<string, number[]> = new Map();
   private readonly sessionSpendTracking: Map<string, number> = new Map();
 
@@ -84,12 +87,20 @@ export class PolicyEngine {
     let matchedOps = 0;
 
     for (const op of opts.transaction.operations) {
-      if ("amount" in op && typeof (op as any).amount === "string") {
-        const opAsset = "asset" in op ? this.getAssetIdentifier((op as any).asset) : "native";
-        if (opAsset === targetAsset) {
-          txAmount += parseFloat((op as any).amount);
-          matchedOps++;
-        }
+      // Type guard: only operations that carry an `amount` field (Payment, PathPayment, etc.)
+      if (!("amount" in op) || typeof (op as { amount: unknown }).amount !== "string") {
+        continue;
+      }
+
+      const typedOp = op as
+        Operation.Payment | Operation.PathPaymentStrictSend | Operation.PathPaymentStrictReceive;
+      const opAsset: Asset | undefined =
+        "asset" in typedOp ? (typedOp as Operation.Payment).asset : undefined;
+      const opAssetId = this.getAssetIdentifier(opAsset);
+
+      if (opAssetId === targetAsset) {
+        txAmount += parseFloat((typedOp as { amount: string }).amount);
+        matchedOps++;
       }
     }
 
@@ -109,20 +120,20 @@ export class PolicyEngine {
     }
     const track = walletTrack.get(trackKey)!;
 
-    if (track.dailyTotal + totalAmount > parseFloat(rule.maxDaily)) {
+    if (track.dailyTotal + txAmount > parseFloat(rule.maxDaily)) {
       return {
         approved: false,
-        reason: `Daily spending ${track.dailyTotal + totalAmount} exceeds limit ${rule.maxDaily}`,
+        reason: `Daily spending ${track.dailyTotal + txAmount} exceeds limit ${rule.maxDaily}`,
       };
     }
 
-    track.dailyTotal += totalAmount;
+    track.dailyTotal += txAmount;
     track.txCount++;
 
     return { approved: true };
   }
 
-  private getAssetIdentifier(asset: any): string {
+  private getAssetIdentifier(asset: Asset | string | undefined | null): string {
     if (!asset) return "native";
     if (typeof asset === "string") {
       if (asset.toLowerCase() === "native" || asset.toUpperCase() === "XLM") {
@@ -130,7 +141,7 @@ export class PolicyEngine {
       }
       return asset;
     }
-    if (typeof asset.isNative === "function" && asset.isNative()) {
+    if (asset.isNative()) {
       return "native";
     }
     if (asset.code && asset.issuer) {
@@ -198,7 +209,7 @@ export class PolicyEngine {
     }
 
     const paymentOp = opts.transaction.operations.find(
-      (op): op is Operation.Payment => "amount" in op && "destination" in op
+      (op): op is Operation.Payment => "amount" in op && "destination" in op,
     ) as Operation.Payment | undefined;
 
     const txAmount = paymentOp ? parseFloat(paymentOp.amount) : 0;
@@ -217,53 +228,13 @@ export class PolicyEngine {
   }
 
   private evaluateTimeBounds(rule: TimeBoundsRule, opts: EvaluateOpts): EvaluateResult {
-    const timeBounds = opts.transaction.timeBounds;
-    if (!timeBounds) {
-      if (rule.allowUnbounded) {
-        return { approved: true };
-      }
-      return {
-        approved: false,
-        reason: "Transaction does not have required TimeBounds",
-      };
-    }
+    const result = validateTimeBounds(opts.transaction, {
+      maxWindowSeconds: rule.maxWindowSeconds,
+      allowUnbounded: rule.allowUnbounded ?? false,
+    });
 
-    const now = Math.floor(Date.now() / 1000);
-    const minTime = parseInt(timeBounds.minTime, 10);
-    const maxTime = parseInt(timeBounds.maxTime, 10);
-
-    if (maxTime === 0) {
-      if (!rule.allowUnbounded) {
-        return {
-          approved: false,
-          reason: "Transaction maxTime is 0 (unbounded), which is prohibited by policy",
-        };
-      }
-      return { approved: true };
-    }
-
-    if (maxTime <= now) {
-      return {
-        approved: false,
-        reason: `Transaction has expired: maxTime (${maxTime}) <= current time (${now})`,
-      };
-    }
-
-    if (minTime > now + 300) {
-      return {
-        approved: false,
-        reason: `Transaction minTime (${minTime}) is in the future`,
-      };
-    }
-
-    if (rule.maxWindowSeconds && rule.maxWindowSeconds > 0) {
-      const window = maxTime - (minTime > 0 ? minTime : now);
-      if (window > rule.maxWindowSeconds) {
-        return {
-          approved: false,
-          reason: `Transaction validity window of ${window}s exceeds policy limit of ${rule.maxWindowSeconds}s`,
-        };
-      }
+    if (!result.valid) {
+      return { approved: false, reason: result.reason };
     }
 
     return { approved: true };

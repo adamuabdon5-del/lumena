@@ -6,11 +6,7 @@ export interface Policy {
 }
 
 export type PolicyRule =
-  | SpendLimit
-  | VelocityRule
-  | AllowlistRule
-  | SessionKeyPolicyRule
-  | TimeBoundsRule;
+  SpendLimit | VelocityRule | AllowlistRule | SessionKeyPolicyRule | TimeBoundsRule;
 
 export interface SpendLimit {
   type: "spend_limit";
@@ -37,6 +33,12 @@ export interface SessionKeyPolicyRule {
   expiresAt: number;
 }
 
+export interface TimeBoundsRule {
+  type: "timebounds";
+  maxWindowSeconds?: number;
+  allowUnbounded?: boolean;
+}
+
 export interface PolicyStore {
   getPolicy(walletId: string): Promise<Policy | null>;
   savePolicy(policy: Policy): Promise<void>;
@@ -45,12 +47,7 @@ export interface PolicyStore {
     walletId: string,
     date: string,
     amount: number,
-    asset?: string
+    asset?: string,
   ): Promise<{ dailyTotal: number; txCount: number }>;
-  recordVelocity(
-    walletId: string,
-    timestamp: number,
-    windowMs: number
-  ): Promise<number>;
+  recordVelocity(walletId: string, timestamp: number, windowMs: number): Promise<number>;
 }
-

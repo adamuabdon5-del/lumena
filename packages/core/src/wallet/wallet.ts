@@ -1,11 +1,11 @@
-import type { Keypair, Asset} from "@stellar/stellar-sdk";
+import type { Keypair, Asset } from "@stellar/stellar-sdk";
 import { Operation, TransactionBuilder, BASE_FEE } from "@stellar/stellar-sdk";
 import type { StellarClient } from "../stellar/client.js";
 import { createSponsoredAccount } from "../stellar/account.js";
 import { setupMultisig } from "../stellar/multisig.js";
 import { KeyManager } from "../keys/manager.js";
 import { ContractClient } from "../soroban/client.js";
-import type { ContractSimulationResult, OperationSpec } from "@lumen/types";
+import type { ContractSimulationResult, OperationSpec, ScValInput } from "@lumen/types";
 
 export interface WalletOpts {
   client: StellarClient;
@@ -101,7 +101,7 @@ export class Wallet {
     }
 
     const balance = account.balances.find(
-      (b: any) => b.asset_code === asset.getCode() && b.asset_issuer === asset.getIssuer()
+      (b: any) => b.asset_code === asset.getCode() && b.asset_issuer === asset.getIssuer(),
     );
     return (balance as any)?.balance ?? "0";
   }
@@ -120,7 +120,7 @@ export class Wallet {
           destination,
           asset,
           amount,
-        })
+        }),
       )
       .setTimeout(180)
       .build();
@@ -137,7 +137,11 @@ export class Wallet {
     throw new Error(`Payment failed: ${result.hash}`);
   }
 
-  async buildPaymentTransaction(destination: string, asset: Asset, amount: string): Promise<string> {
+  async buildPaymentTransaction(
+    destination: string,
+    asset: Asset,
+    amount: string,
+  ): Promise<string> {
     if (!this._keypair) throw new Error("Wallet not initialized");
 
     const account = await this.client.horizon.loadAccount(this.address);
@@ -151,7 +155,7 @@ export class Wallet {
           destination,
           asset,
           amount,
-        })
+        }),
       )
       .setTimeout(180)
       .build();
@@ -212,7 +216,7 @@ export class Wallet {
   async simulateContract(
     contractId: string,
     method: string,
-    args?: any[]
+    args?: ScValInput[],
   ): Promise<ContractSimulationResult> {
     const contractClient = new ContractClient(this.client);
     return contractClient.simulate({ contractId, method, args }, this.address);
@@ -221,8 +225,8 @@ export class Wallet {
   async buildContractInvocationTransaction(
     contractId: string,
     method: string,
-    args?: any[],
-    fee?: string
+    args?: ScValInput[],
+    fee?: string,
   ): Promise<string> {
     if (!this._keypair) throw new Error("Wallet not initialized");
 
@@ -240,8 +244,8 @@ export class Wallet {
   async invokeContract(
     contractId: string,
     method: string,
-    args?: any[],
-    fee?: string
+    args?: ScValInput[],
+    fee?: string,
   ): Promise<{ hash: string }> {
     if (!this._keypair) throw new Error("Wallet not initialized");
 
