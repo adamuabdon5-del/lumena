@@ -1,5 +1,5 @@
 export type { StellarNetwork, StellarConfig, SignerConfig, TransactionResult } from "./stellar.js";
 export type { WalletState, WalletConfig, WalletInstance } from "./wallet.js";
 export type { Intent, PaymentIntent, SwapIntent } from "./intent.js";
-export type { Policy, PolicyRule, SpendLimit, VelocityRule, AllowlistRule, SessionKeyPolicyRule, PolicyStore } from "./policy.js";
+export type { Policy, PolicyRule, SpendLimit, VelocityRule, AllowlistRule, SessionKeyPolicyRule, TimeBoundsRule, PolicyStore } from "./policy.js";
 export type { Signer } from "./signer.js";
