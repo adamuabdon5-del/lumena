@@ -1,7 +1,8 @@
 import { TransactionBuilder, Transaction, Keypair, xdr } from "@stellar/stellar-sdk";
 import type { Signer } from "@lumen/types";
-import type { StellarClient } from "@lumen/core";
+import { validateTimeBounds, type StellarClient } from "@lumen/core";
 import type { PolicyEngine } from "../policy/engine.js";
+import type { WebhookDispatcher } from "../webhook/dispatcher.js";
 
 export interface CosignerOpts {
   client: StellarClient;
@@ -56,7 +57,39 @@ export class CosignerService {
       return {
         signedXdr: "",
         approved: false,
-        reason: "Expected a regular transaction, got fee-bump",
+        reason:
+          "Fee-bump transactions are not accepted for co-signing. Please submit a regular transaction.",
+      };
+    }
+
+    if (tx.source !== request.walletAddress) {
+      return {
+        signedXdr: "",
+        approved: false,
+        reason: "Transaction source does not match wallet address",
+      };
+    }
+
+    const txHash = tx.hash();
+    let hasOwnerSignature = false;
+    try {
+      const ownerKeypair = Keypair.fromPublicKey(request.walletAddress);
+      hasOwnerSignature = tx.signatures.some((sig) => {
+        try {
+          return ownerKeypair.verify(txHash, sig.signature());
+        } catch {
+          return false;
+        }
+      });
+    } catch {
+      hasOwnerSignature = false;
+    }
+
+    if (!hasOwnerSignature) {
+      return {
+        signedXdr: "",
+        approved: false,
+        reason: "Transaction is not signed by the wallet owner",
       };
     }
 
@@ -85,7 +118,7 @@ export class CosignerService {
           .dispatch("policy.violated", {
             walletAddress: request.walletAddress,
             reason: policyResult.reason,
-            txHash: tx.hash().toString("hex"),
+            txHash: txHash.toString("hex"),
           })
           .catch(() => {});
       }
@@ -98,7 +131,6 @@ export class CosignerService {
     }
 
     // Sign using the abstracted Signer (KMS or env-keypair).
-    const txHash = tx.hash();
     const signature = await this.signer.sign(txHash);
 
     // Attach the signature to the transaction envelope using the decorated hint
