@@ -1,0 +1,15 @@
+# PR Size Label Configuration
+#
+# Labels are automatically applied to pull requests based on the total number
+# of changed lines (additions + deletions) by the PR size labeler workflow at
+# .github/workflows/labeler.yml.
+#
+# Thresholds:
+#   size/XS  —   0 to  10 changed lines
+#   size/S   —  11 to 100 changed lines
+#   size/M   — 101 to 500 changed lines
+#   size/L   — 501 to 1000 changed lines
+#   size/XL  — 1001+ changed lines (a warning comment is also posted)
+#
+# Large PRs (size/XL) will receive an automated comment asking the author to
+# consider splitting the PR for easier review.

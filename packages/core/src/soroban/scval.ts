@@ -1,15 +1,10 @@
-import {
-  Address,
-  nativeToScVal,
-  scValToNative,
-  xdr,
-} from "@stellar/stellar-sdk";
-import type { ScValType, ContractArg } from "@lumen/types";
+import { Address, nativeToScVal, scValToNative, xdr } from "@stellar/stellar-sdk";
+import type { ScValType, ScValInput } from "@lumen/types";
 
 /**
  * Converts a JavaScript value or ContractArg into a Stellar Soroban xdr.ScVal.
  */
-export function toScVal(input: ContractArg | any, explicitType?: ScValType): xdr.ScVal {
+export function toScVal(input: ScValInput, explicitType?: ScValType): xdr.ScVal {
   if (input instanceof xdr.ScVal) {
     return input;
   }
@@ -53,8 +48,8 @@ export function toScVal(input: ContractArg | any, explicitType?: ScValType): xdr
         const buf = Buffer.isBuffer(value)
           ? value
           : typeof value === "string"
-          ? Buffer.from(value, "hex")
-          : Buffer.from(value);
+            ? Buffer.from(value, "hex")
+            : Buffer.from(value);
         return xdr.ScVal.scvBytes(buf);
       }
       default:
